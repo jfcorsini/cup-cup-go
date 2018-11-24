@@ -81,7 +81,10 @@ router.get('/:accountId/payments', (req, res) => {
   console.log('Getting payments');
 
   return db.getPayments(req.account.account_id)
-    .then(payments => res.json({ payments }))
+    .then(payments => res.json({
+      payments,
+      balance: req.account.balance,
+    }))
     .catch((err) => {
       console.log('Failed to get payments', err);
 
