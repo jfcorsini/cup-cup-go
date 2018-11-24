@@ -263,6 +263,8 @@ const getPayments = (accountId) => {
     Key: { account_id: accountId },
     KeyConditionExpression: 'account_id = :account_id',
     ExpressionAttributeValues: { ':account_id': accountId },
+    Limit: 3,
+    ScanIndexForward: false,
   };
 
   return docClient.query(queryParams).promise()
