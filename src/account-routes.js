@@ -25,7 +25,7 @@ router.param('accountId', (req, res, next, accountId) => {
     })
 });
 
-router.post('/:accountId/tag', (req, res) => {
+router.post('/:accountId/tags', (req, res) => {
   const { body: { name, tag_number } } = req;
 
   const tagParams = {
@@ -45,7 +45,7 @@ router.post('/:accountId/tag', (req, res) => {
     });
 });
 
-router.get('/:accountId/tag', (req, res) => {
+router.get('/:accountId/tags', (req, res) => {
   return db.getTags(req.account.account_id)
     .then((tags) => res.json({ tags })) // Empty result when success
     .catch((err) => {
@@ -55,7 +55,7 @@ router.get('/:accountId/tag', (req, res) => {
     });
 });
 
-router.delete('/:accountId/tag/:tagNumber', (req, res) => {
+router.delete('/:accountId/tags/:tagNumber', (req, res) => {
   const tagNumber = req.params.tagNumber;
   console.log(`Deleting tag ${tagNumber}`);
 
