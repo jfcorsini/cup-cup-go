@@ -113,13 +113,21 @@ const login = (params) => {
  * Creates a tag and returns a promise.
  * @param {Object} params
  */
-const createTag = (params) => {
+const createTag = async (params) => {
+  const tag = await getTag(params.tag_number);
+  console.log('This is tag', tag);
+
+  if (tag) {
+    return { success: false };
+  }
+
   const queryParams = {
     TableName: tables.tags,
     Item: params,
   };
 
-  return docClient.put(queryParams).promise();
+  return docClient.put(queryParams).promise()
+    .then(res => ({ success: true, data: res}));
 };
 
 /**
@@ -139,31 +147,13 @@ const getTags = (accountId) => {
 };
 
 /**
- * If exists, returns a tag. Otherwise, returns null.
- * @param {String} accountId
- * @param {String} tagNumber
- */
-const getTag = (accountId, tagNumber) => {
-  const queryParams = {
-    TableName: tables.tags,
-    Key: {
-      account_id: accountId,
-      tag_number: tagNumber,
-    },
-  };
-
-  return docClient.get(queryParams).promise()
-    .then(res => res.Item || null);
-};
-
-/**
  * Deletes a tag and returns a Promise.
  *
  * @param {String} accountId
  * @param {String} tagNumber
  */
 const deleteTag = (accountId, tagNumber) => {
-  return getTag(accountId, tagNumber)
+  return getTag(tagNumber)
     .then((tag) => {
       if (!tag) {
         return {
@@ -194,7 +184,7 @@ const deleteTag = (accountId, tagNumber) => {
     });
 };
 
-const getAccountByTagNumber = (tagNumber) => {
+const getTag = (tagNumber) => {
   const queryParams = {
     TableName: tables.tags,
     IndexName: 'tag_number',
@@ -205,15 +195,12 @@ const getAccountByTagNumber = (tagNumber) => {
 
   return docClient.query(queryParams).promise()
     .then((result) => {
-      console.log('Results from getAccountByTagNumber', result);
+      console.log('Results from getTag', result);
       if (result && result.Items && result.Items.length > 0) {
-        return {
-          success: true,
-          data: result.Items[0],
-        };
+        return result.Items[0];
       }
       
-      return { success: false };
+      return null;
     })
 };
 
@@ -289,7 +276,6 @@ module.exports = {
   getTags,
   getTag,
   deleteTag,
-  getAccountByTagNumber,
   makePurchase,
   getPayments,
 };

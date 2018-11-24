@@ -12,16 +12,16 @@ const WEIRD_ERROR = 999;
 router.post('/pay', (req, res) => {
   const { body: {tag_number: number, product_id: productId } } = req;
 
-  return db.getAccountByTagNumber(number)
-    .then((result) => {
-      if (!result.success) {
+  return db.getTag(number)
+    .then((tag) => {
+      if (!tag) {
         return res.status(404).json({
           cup_code: TAG_DOES_NOT_EXIST,
           error: 'Tag does not exist',
         });
       }
-      console.log('Account found', result.data);
-      const accountId = result.data.account_id;
+      console.log('Tag found', tag);
+      const accountId = tag.account_id;
 
       return db.makePurchase(accountId, productId)
         .then((result) => {

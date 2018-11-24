@@ -37,7 +37,14 @@ router.post('/:accountId/tags', (req, res) => {
   console.log('Tag params to create', tagParams);
 
   return db.createTag(tagParams)
-    .then(() => res.json({})) // Empty result when success
+    .then((result) => {
+      console.log('Result from creating tag', result);
+      if (!result.success) {
+        return res.status(409).json({ error: 'Tag already exists' });
+      }
+
+      return res.json(result.data);
+    })
     .catch((err) => {
       console.log({ err }, 'Failed to create newtag');
 
