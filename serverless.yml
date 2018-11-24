@@ -15,8 +15,8 @@ resources:
           - AttributeName: email
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         GlobalSecondaryIndexes:
           - IndexName: account_id
             KeySchema:
@@ -25,8 +25,8 @@ resources:
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
     tagsTable:
       Type: AWS::DynamoDB::Table
@@ -43,8 +43,8 @@ resources:
           - AttributeName: tag_number
             KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         GlobalSecondaryIndexes:
           - IndexName: tag_number
             KeySchema:
@@ -53,8 +53,8 @@ resources:
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
     productsTable:
       Type: AWS::DynamoDB::Table
@@ -67,8 +67,8 @@ resources:
           - AttributeName: product_id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
 
     paymentsTable:
       Type: AWS::DynamoDB::Table
@@ -85,8 +85,8 @@ resources:
           - AttributeName: date
             KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
 
 provider:
   name: aws
