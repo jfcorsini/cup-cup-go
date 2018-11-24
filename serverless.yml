@@ -1,0 +1,127 @@
+service: cup-cup-go
+
+resources:
+  Resources:
+    accountsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ccg-accounts
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: account_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: account_id
+            KeySchema:
+              - AttributeName: account_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
+    tagsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ccg-tags
+        AttributeDefinitions:
+          - AttributeName: account_id
+            AttributeType: S
+          - AttributeName: tag_number
+            AttributeType: S
+        KeySchema:
+          - AttributeName: account_id
+            KeyType: HASH
+          - AttributeName: tag_number
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: tag_number
+            KeySchema:
+              - AttributeName: tag_number
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
+    productsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ccg-products
+        AttributeDefinitions:
+          - AttributeName: product_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: product_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    paymentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ccg-payments
+        AttributeDefinitions:
+          - AttributeName: account_id
+            AttributeType: S
+          - AttributeName: date
+            AttributeType: S
+        KeySchema:
+          - AttributeName: account_id
+            KeyType: HASH
+          - AttributeName: date
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-central-1
+  stage: dev
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:Scan
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [ accountsTable, Arn ]
+        - "Fn::GetAtt": [ tagsTable, Arn ]
+        - "Fn::GetAtt": [ productsTable, Arn ]
+        - "Fn::GetAtt": [ paymentsTable, Arn ]
+        - Fn::Join:
+          - "/"
+          -
+            - { "Fn::GetAtt": ["accountsTable", "Arn" ] }
+            - "index/*"
+        - Fn::Join:
+          - "/"
+          -
+            - { "Fn::GetAtt": ["tagsTable", "Arn" ] }
+            - "index/*"
+
+functions:
+  express:
+    handler: handler.app
+    events:
+      - http: 'ANY /'
+      - http: 'ANY {proxy+}'
