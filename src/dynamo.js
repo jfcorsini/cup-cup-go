@@ -232,6 +232,8 @@ const makePurchase = async (accountId, productId) => {
       account_id: accountId,
       product_id: productId,
       price,
+      product_name: product.name,
+      type: product.type,
     },
   };
 
