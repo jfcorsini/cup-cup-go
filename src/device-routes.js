@@ -9,11 +9,11 @@ const MONEY_NOT_ENOUGH = 911
 const TAG_DOES_NOT_EXIST = 922;
 const WEIRD_ERROR = 999;
 
-router.post('/pay', (req, res) => {
-  const { body: {tag_number: number, product_id: productId } } = req;
+router.post('/pay', async (req, res) => {
+  const { body } = req;
 
-  return db.getTag(number)
-    .then((tag) => {
+  return db.getTag(body.tag_number)
+    .then(async (tag) => {
       if (!tag) {
         return res.status(404).json({
           cup_code: TAG_DOES_NOT_EXIST,
@@ -22,6 +22,17 @@ router.post('/pay', (req, res) => {
       }
       console.log('Tag found', tag);
       const accountId = tag.account_id;
+
+      let servo;
+      let productId;
+      if (body.product_id) {
+        productId = body.product_id;
+        servo = 'servo_01';
+      } else {
+        const picketProduct = await db.pickProductForTag(tag, body.products);
+        productId = picketProduct.id;
+        servo = picketProduct.servo;
+      }
 
       return db.makePurchase(accountId, productId)
         .then((result) => {
@@ -33,7 +44,10 @@ router.post('/pay', (req, res) => {
             });
           }
 
-          return res.json(result.data);
+          return res.json({
+            balance: result.data,
+            servo,
+          });
         })
     })
     .catch((err) => {

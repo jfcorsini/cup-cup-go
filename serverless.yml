@@ -103,6 +103,7 @@ provider:
         - dynamodb:Query
         - dynamodb:GetItem
         - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
       Resource:
         - "Fn::GetAtt": [ accountsTable, Arn ]
         - "Fn::GetAtt": [ tagsTable, Arn ]

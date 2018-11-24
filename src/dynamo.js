@@ -253,7 +253,7 @@ const makePurchase = async (accountId, productId) => {
 
   return {
     success: true,
-    data: response.Attributes,
+    data: response.Attributes.balance,
   };
 };
 
@@ -271,6 +271,57 @@ const getPayments = (accountId) => {
     .then((result) => result.Items || []);
 };
 
+/**
+ * 
+ * @param {Object} tag
+ * @param {Object} products - Object where keys are product_id and values are servo ids
+ */
+const pickProductForTag = (tag, productServos) => {
+  if (!tag.preference) {
+      // If tag has no preference, return the first one
+    return {
+      id: Object.keys(productServos)[0],
+      servo: Object.values(productServos)[0],
+    };
+  }
+
+  // Prepare batchGet params
+  const productKeys = Object.keys(productServos).map(productId => ({ product_id: productId}));
+
+  const batchParams = {
+    RequestItems: {
+      [tables.products]: {
+        Keys: productKeys,
+      }
+    },
+  };
+
+  return docClient.batchGet(batchParams).promise()
+    .then((result) => {
+      const products = result.Responses[tables.products] || [];
+      const preferedProducts = products.filter(product => product.type === tag.preference)
+        .map((product) => ({
+          id: product.product_id,
+          servo: productServos[product.product_id],
+        }));
+      
+      console.log('All prefered products', preferedProducts);
+
+      // If nothing found, return the first one
+      if (!preferedProducts.length) {
+        return {
+          id: Object.keys(productServos)[0],
+          servo: Object.values(productServos)[0],
+        };
+      }
+
+      return preferedProducts[0];
+    })
+    .catch((err) => {
+      console.log('Failed to batch get', err);
+    })
+};
+
 module.exports = {
   tables,
   createAccount,
@@ -282,4 +333,5 @@ module.exports = {
   deleteTag,
   makePurchase,
   getPayments,
+  pickProductForTag,
 };
